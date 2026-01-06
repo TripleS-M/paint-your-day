@@ -3,29 +3,46 @@
  * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
  */
 
-import { Platform } from 'react-native';
+import { useMemo } from 'react';
+import { Platform, useColorScheme } from 'react-native';
 
 const tintColorLight = '#0a7ea4';
 const tintColorDark = '#fff';
 
 export const Colors = {
   light: {
-    text: '#11181C',
-    background: '#fff',
-    tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
-    tabIconSelected: tintColorLight,
-  },
-  dark: {
-    text: '#ECEDEE',
-    background: '#151718',
-    tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
-    tabIconSelected: tintColorDark,
-  },
+    background: '#ffffff',
+    foreground: '#252525',
+    card: '#f9f9f9',
+    cardForeground: '#252525',
+    header: '#f5f5f5',
+    work: '#F5D5D8',
+    relax:'#E8D5F2',
+    excercise: '#F5E6D3',
+    rest: '#C8E6F5',
+    personal:'#D5F5E3',
+    defaultBlock:'#e0e0e0',
+    },
+    
+    dark: {
+    background: '#121212',
+    foreground: '#ffffff',
+    card: '#252525',
+    cardForeground: '#ffffff',
+    header: '#f5f5f5',
+    work: '#F5D5D8',
+    relax:'#E8D5F2',
+    excercise: '#F5E6D3',
+    rest: '#C8E6F5',
+    personal:'#D5F5E3',
+    defaultBlock:'#e0e0e0',
+    }
 };
+
+export const useTheme = () => {
+  const colorScheme = useColorScheme();
+  return useMemo( () => (colorScheme === 'dark' ? Colors.dark : Colors.light), [colorScheme]);
+}
 
 export const Fonts = Platform.select({
   ios: {
