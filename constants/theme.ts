@@ -39,6 +39,24 @@ export const Colors = {
     }
 };
 
+export const CategoryColors = {
+  rest: { light: '#D4C5F9', dark: '#D4C5F9', name: 'Rest' },
+  work: { light: '#ADD5F7', dark: '#ADD5F7', name: 'Work' },
+  movement: { light: '#F5E6D3', dark: '#F5E6D3', name: 'Movement' },
+  connection: { light: '#F7D4E0', dark: '#F7D4E0', name: 'Connection' },
+  learning: { light: '#D4F7E3', dark: '#D4F7E3', name: 'Learning' },
+  creative: { light: '#F7F0D4', dark: '#F7F0D4', name: 'Creative' },
+};
+
+export const CategoryColorsDark = {
+  rest: '#9B8FD9',
+  work: '#7EB7E8',
+  movement: '#D9C29F',
+  connection: '#E89FAF',
+  learning: '#9FD9B8',
+  creative: '#D9CE9F',
+};
+
 export const useTheme = () => {
   const colorScheme = useColorScheme();
   return useMemo( () => (colorScheme === 'dark' ? Colors.dark : Colors.light), [colorScheme]);
