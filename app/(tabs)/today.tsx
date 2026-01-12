@@ -89,15 +89,22 @@ export default function TodayScreen() {
               <Pressable
                 key={category.key}
                 onPress={() => setSelectedCategory(category.key)}
-                style={({ pressed }) => ({
-                  paddingVertical: 10,
-                  paddingHorizontal: 18,
-                  borderRadius: 12,
-                  backgroundColor: category.light,
-                  borderWidth: 1.5,
-                  borderColor: category.light,
-                  opacity: pressed ? 0.8 : 1,
-                })}
+                style={({ pressed }) => {
+                  const isSelected = selectedCategory === category.key;
+                  const outlineColor = isSelected
+                    ? (colorScheme === 'dark' ? '#ffffff' : '#000000')
+                    : category.light;
+                  
+                  return {
+                    paddingVertical: 10,
+                    paddingHorizontal: 18,
+                    borderRadius: 12,
+                    backgroundColor: category.light,
+                    borderWidth: 1.5,
+                    borderColor: outlineColor,
+                    opacity: pressed ? 0.8 : 1,
+                  };
+                }}
               >
                 <Text style={{ 
                   fontSize: 13, 
@@ -126,7 +133,8 @@ export default function TodayScreen() {
         <Pressable
           onPress={() => setSelectedCategory(null)}
           style={({ pressed }) => {
-            const outlineColor = pressed
+            const isClearPressed = selectedCategory === null;
+            const outlineColor = isClearPressed
               ? (colorScheme === 'dark' ? '#ffffff' : '#000000')
               : theme.defaultBlock;
             
