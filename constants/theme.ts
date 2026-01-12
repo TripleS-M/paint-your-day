@@ -11,7 +11,7 @@ const tintColorDark = '#fff';
 
 export const Colors = {
   light: {
-    background: '#ffffff',
+    background: '#F9FAFB',
     foreground: '#252525',
     card: '#f9f9f9',
     cardForeground: '#252525',
@@ -21,7 +21,7 @@ export const Colors = {
     excercise: '#F5E6D3',
     rest: '#C8E6F5',
     personal:'#D5F5E3',
-    defaultBlock:'#e0e0e0',
+    defaultBlock:'#FFFFFF',
     },
     
     dark: {
@@ -35,7 +35,7 @@ export const Colors = {
     excercise: '#F5E6D3',
     rest: '#C8E6F5',
     personal:'#D5F5E3',
-    defaultBlock:'#e0e0e0',
+    defaultBlock:'#FFFFFF',
     }
 };
 
