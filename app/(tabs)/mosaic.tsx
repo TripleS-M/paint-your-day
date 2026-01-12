@@ -183,9 +183,16 @@ export default function MosaicScreen() {
           onPress={() => {
             const prev = new Date(currentDate);
             prev.setMonth(prev.getMonth() - 1);
-            setCurrentDate(prev);
+            // Only allow going back to January 2026
+            if (prev.getFullYear() > 2026 || (prev.getFullYear() === 2026 && prev.getMonth() >= 0)) {
+              setCurrentDate(prev);
+            }
           }}
-          style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+          style={({ pressed }) => {
+            const canGoBack = currentDate.getFullYear() > 2026 || (currentDate.getFullYear() === 2026 && currentDate.getMonth() > 0);
+            return { opacity: canGoBack ? (pressed ? 0.6 : 1) : 0.3 };
+          }}
+          disabled={currentDate.getFullYear() === 2026 && currentDate.getMonth() === 0}
         >
           <Text style={{ fontSize: 20, color: theme.foreground }}>←</Text>
         </Pressable>
@@ -201,9 +208,25 @@ export default function MosaicScreen() {
           onPress={() => {
             const next = new Date(currentDate);
             next.setMonth(next.getMonth() + 1);
-            setCurrentDate(next);
+            const today = new Date();
+            // Only allow going forward to current month
+            if (next <= today) {
+              setCurrentDate(next);
+            }
           }}
-          style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+          style={({ pressed }) => {
+            const today = new Date();
+            const nextMonth = new Date(currentDate);
+            nextMonth.setMonth(nextMonth.getMonth() + 1);
+            const canGoForward = nextMonth <= today;
+            return { opacity: canGoForward ? (pressed ? 0.6 : 1) : 0.3 };
+          }}
+          disabled={(() => {
+            const today = new Date();
+            const nextMonth = new Date(currentDate);
+            nextMonth.setMonth(nextMonth.getMonth() + 1);
+            return nextMonth > today;
+          })()}
         >
           <Text style={{ fontSize: 20, color: theme.foreground }}>→</Text>
         </Pressable>
@@ -228,17 +251,26 @@ export default function MosaicScreen() {
                         </Text>
                       </View>
                       <View style={{ flex: 1, flexDirection: 'row', gap: 0, height: 32 }}>
-                        {get2HourBlockColors(dayObj.dateStr).map((color, blockIndex) => (
-                          <View
-                            key={blockIndex}
-                            style={{
-                              flex: 1,
-                              backgroundColor: color,
-                              borderWidth: 0.5,
-                              borderColor: 'rgba(0,0,0,0.1)',
-                            }}
-                          />
-                        ))}
+                        {get2HourBlockColors(dayObj.dateStr).map((color, blockIndex, array) => {
+                          const isFirst = blockIndex === 0;
+                          const isLast = blockIndex === array.length - 1;
+                          
+                          return (
+                            <View
+                              key={blockIndex}
+                              style={{
+                                flex: 1,
+                                backgroundColor: color,
+                                borderWidth: 0.5,
+                                borderColor: 'rgba(0,0,0,0.1)',
+                                borderTopLeftRadius: isFirst ? 8 : 0,
+                                borderBottomLeftRadius: isFirst ? 8 : 0,
+                                borderTopRightRadius: isLast ? 8 : 0,
+                                borderBottomRightRadius: isLast ? 8 : 0,
+                              }}
+                            />
+                          );
+                        })}
                       </View>
                     </View>
                   ) : null
