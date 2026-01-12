@@ -40,8 +40,14 @@ export default function TimeBlock({
         return category?.darkColor || '#c0c0c0';
     };
 
+    // Get outline color - matches category color
+    const getOutlineColor = () => {
+        return getColorForCategory(block.categoryId);
+    };
+
     const currentColor = getColorForCategory(block.categoryId);
     const darkenedColor = getDarkenedColor(block.categoryId);
+    const outlineColor = getOutlineColor();
 
     return (
         <Pressable
@@ -58,7 +64,7 @@ export default function TimeBlock({
                     overflow: 'hidden',
                     backgroundColor: theme.defaultBlock,
                     borderWidth: 1.5,
-                    borderColor: '#ddd',
+                    borderColor: outlineColor,
                 }}
             >
                 {block.categoryId && (
@@ -113,13 +119,3 @@ export default function TimeBlock({
         </Pressable>
     );
 }
-
-const StyleSheet = {
-    absoluteFillObject: {
-        position: 'absolute' as const,
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-    },
-};

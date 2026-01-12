@@ -1,28 +1,32 @@
 // components/DayStrip.tsx
-import { ScrollView, View } from "react-native";
-import TimeBlock from "./TimeBlock";
+import type { Day } from "@/constants/types";
+import { ScrollView, Text, View } from "react-native";
+import TimeBlock from "./TimeBlockNew";
 
 type DayStripProps = {
-  blocks?: number;
+  day: Day;
   selectedCategory?: string | null;
-  blockData?: Record<number, string | null>;
-  onBlockUpdate?: (data: Record<number, string | null>) => void;
+  onBlockUpdate?: (hour: number, categoryId: string | null) => void;
 };
 
-export default function DayStrip({ blocks = 12, selectedCategory, blockData = {}, onBlockUpdate }: DayStripProps) {
-  const handleBlockPress = (index: number) => {
-    const newData = { ...blockData };
-    
-    if (selectedCategory === null) {
-      // Clear mode - remove the color
-      delete newData[index];
-    } else if (selectedCategory) {
-      // Set color mode - fill with selected category
-      newData[index] = selectedCategory;
-    }
-    
-    onBlockUpdate?.(newData);
+export default function DayStrip({ day, selectedCategory, onBlockUpdate }: DayStripProps) {
+  const handleBlockPress = (startHour: number) => {
+    onBlockUpdate?.(startHour, selectedCategory || null);
   };
+
+  // Create 2-hour blocks
+  const twoHourBlocks = [];
+  for (let i = 0; i < 12; i++) {
+    const startHour = i * 2;
+    const endHour = (i * 2 + 1) % 24;
+    const blocks = [day.blocks[startHour], day.blocks[startHour + 1]];
+    twoHourBlocks.push({
+      startHour,
+      endHour,
+      blocks,
+      categoryId: blocks[0]?.categoryId || null,
+    });
+  }
 
   return (
     <ScrollView 
@@ -34,37 +38,31 @@ export default function DayStrip({ blocks = 12, selectedCategory, blockData = {}
       <View style={{ flexDirection: 'column', flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 16 }}>
         {/* Time blocks row */}
         <View style={{ flexDirection: 'row', gap: 16, justifyContent: 'center', marginBottom: 16 }}>
-          {Array.from({ length: blocks }).map((_, i) => (
+          {twoHourBlocks.map((block) => (
             <TimeBlock 
-              key={i} 
-              index={i}
-              color={blockData[i] || null}
-              onPress={() => handleBlockPress(i)}
+              key={block.startHour} 
+              block={{
+                hour: block.startHour,
+                categoryId: block.categoryId,
+              }}
+              isSelected={selectedCategory !== null && block.categoryId === selectedCategory}
+              onPress={() => handleBlockPress(block.startHour)}
             />
           ))}
         </View>
         
         {/* Time labels row */}
         <View style={{ flexDirection: 'row', gap: 16, justifyContent: 'center' }}>
-          {Array.from({ length: blocks }).map((_, i) => {
-            const start = i * 2;
-            const end = ((i + 1) * 2) % 24;
-            return (
-              <View key={i} style={{ width: 60, justifyContent: 'center', alignItems: 'center' }}>
-                <Text style={{ fontSize: 9, color: '#999', textAlign: 'center' }}>
-                  {`${start}:00`}
-                </Text>
-                <Text style={{ fontSize: 9, color: '#999', textAlign: 'center' }}>
-                  {`${end}:00`}
-                </Text>
-              </View>
-            );
-          })}
+          {twoHourBlocks.map((block) => (
+            <View key={block.startHour} style={{ width: 60, justifyContent: 'center', alignItems: 'center' }}>
+              <Text style={{ fontSize: 9, color: '#999', textAlign: 'center' }}>
+                {`${String(block.startHour).padStart(2, '0')}:00 - ${String((block.startHour + 2) % 24).padStart(2, '0')}:00`}
+              </Text>
+            </View>
+          ))}
         </View>
       </View>
     </ScrollView>
   );
 }
-
-import { Text } from "react-native";
 

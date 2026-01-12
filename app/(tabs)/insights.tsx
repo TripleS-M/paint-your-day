@@ -1,112 +1,197 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { dataService } from '@/constants/dataService';
+import { useTheme } from '@/constants/theme';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback, useState } from 'react';
+import { ScrollView, Text, View } from 'react-native';
 
-import { Collapsible } from '@/components/ui/collapsible';
-import { ExternalLink } from '@/components/external-link';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Fonts } from '@/constants/theme';
+export default function InsightsScreen() {
+  const theme = useTheme();
+  const [insights, setInsights] = useState<any>(null);
 
-export default function TabTwoScreen() {
+  useFocusEffect(
+    useCallback(() => {
+      loadInsights();
+      return () => {};
+    }, [])
+  );
+
+  const loadInsights = () => {
+    try {
+      const data = dataService.getInsights();
+      setInsights(data);
+    } catch (error) {
+      console.error('Error loading insights:', error);
+    }
+  };
+
+  if (!insights) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.background }}>
+        <Text style={{ color: theme.foreground }}>Loading insights...</Text>
+      </View>
+    );
+  }
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText
-          type="title"
+    <View style={{ flex: 1, paddingTop: 60, backgroundColor: theme.background }}>
+      {/* Header */}
+      <View style={{ paddingHorizontal: 24, paddingBottom: 24 }}>
+        <Text style={{ fontSize: 12, fontWeight: '600', color: theme.foreground, opacity: 0.5, letterSpacing: 0.5 }}>
+          INSIGHTS
+        </Text>
+        <Text style={{ fontSize: 28, fontWeight: "bold", color: theme.foreground, marginTop: 4 }}>
+          Gentle reflections
+        </Text>
+      </View>
+
+      {/* Insights Cards */}
+      <ScrollView style={{ flex: 1, paddingHorizontal: 24 }} showsVerticalScrollIndicator={false}>
+        {/* Days Tracked */}
+        <View
           style={{
-            fontFamily: Fonts.rounded,
-          }}>
-          Explore
-        </ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image
-          source={require('@/assets/images/react-logo.png')}
-          style={{ width: 100, height: 100, alignSelf: 'center' }}
-        />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful{' '}
-          <ThemedText type="defaultSemiBold" style={{ fontFamily: Fonts.mono }}>
-            react-native-reanimated
-          </ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+            backgroundColor: theme.card,
+            borderRadius: 16,
+            padding: 20,
+            marginBottom: 16,
+            borderWidth: 1,
+            borderColor: '#eee',
+          }}
+        >
+          <Text style={{ fontSize: 12, color: theme.foreground, opacity: 0.6, marginBottom: 8 }}>
+            Days Reflected On
+          </Text>
+          <Text style={{ fontSize: 36, fontWeight: 'bold', color: theme.foreground }}>
+            {insights.totalDaysTracked}
+          </Text>
+          <Text style={{ fontSize: 12, color: theme.foreground, opacity: 0.5, marginTop: 8 }}>
+            Each day is a new pattern
+          </Text>
+        </View>
+
+        {/* Most Used Category */}
+        {insights.mostUsedCategory && (
+          <View
+            style={{
+              backgroundColor: theme.card,
+              borderRadius: 16,
+              padding: 20,
+              marginBottom: 16,
+              borderWidth: 1,
+              borderColor: '#eee',
+            }}
+          >
+            <Text style={{ fontSize: 12, color: theme.foreground, opacity: 0.6, marginBottom: 12 }}>
+              Most Present In Your Days
+            </Text>
+            <View
+              style={{
+                backgroundColor: insights.mostUsedCategory.color,
+                borderRadius: 12,
+                padding: 20,
+                justifyContent: 'center',
+                alignItems: 'center',
+                marginBottom: 8,
+              }}
+            >
+              <Text style={{ fontSize: 20, fontWeight: '600', color: '#000' }}>
+                {insights.mostUsedCategory.name}
+              </Text>
+            </View>
+            <Text style={{ fontSize: 12, color: theme.foreground, opacity: 0.5, textAlign: 'center' }}>
+              {insights.mostUsedCategory.color}
+            </Text>
+          </View>
+        )}
+
+        {/* Category Usage Breakdown */}
+        {insights.categoryUsage.length > 0 && (
+          <View
+            style={{
+              backgroundColor: theme.card,
+              borderRadius: 16,
+              padding: 20,
+              marginBottom: 16,
+              borderWidth: 1,
+              borderColor: '#eee',
+            }}
+          >
+            <Text style={{ fontSize: 12, color: theme.foreground, opacity: 0.6, marginBottom: 12 }}>
+              Your Palette Usage
+            </Text>
+            {insights.categoryUsage.slice(0, 6).map((item: any, index: number) => (
+              <View key={index} style={{ marginBottom: 12 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                  <Text style={{ fontSize: 14, fontWeight: '500', color: theme.foreground }}>
+                    {item.category.name}
+                  </Text>
+                  <Text style={{ fontSize: 12, color: theme.foreground, opacity: 0.6 }}>
+                    {item.count} hours
+                  </Text>
+                </View>
+                <View
+                  style={{
+                    height: 8,
+                    backgroundColor: '#eee',
+                    borderRadius: 4,
+                    overflow: 'hidden',
+                  }}
+                >
+                  <View
+                    style={{
+                      height: '100%',
+                      backgroundColor: item.category.color,
+                      width: `${Math.min((item.count / insights.totalBlocksAssigned) * 100, 100)}%`,
+                      borderRadius: 4,
+                    }}
+                  />
+                </View>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* Statistics */}
+        <View
+          style={{
+            backgroundColor: theme.card,
+            borderRadius: 16,
+            padding: 20,
+            marginBottom: 20,
+            borderWidth: 1,
+            borderColor: '#eee',
+          }}
+        >
+          <Text style={{ fontSize: 12, color: theme.foreground, opacity: 0.6, marginBottom: 12 }}>
+            Overview
+          </Text>
+          <View style={{ flexDirection: 'row', gap: 16 }}>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 12, color: theme.foreground, opacity: 0.5 }}>
+                Total Hours Tracked
+              </Text>
+              <Text style={{ fontSize: 24, fontWeight: 'bold', color: theme.foreground, marginTop: 4 }}>
+                {insights.totalBlocksAssigned}
+              </Text>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 12, color: theme.foreground, opacity: 0.5 }}>
+                Categories Used
+              </Text>
+              <Text style={{ fontSize: 24, fontWeight: 'bold', color: theme.foreground, marginTop: 4 }}>
+                {insights.categoryUsage.length}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {insights.totalDaysTracked === 0 && (
+          <View style={{ paddingVertical: 20, alignItems: 'center' }}>
+            <Text style={{ fontSize: 14, color: theme.foreground, opacity: 0.6 }}>
+              Start painting your days to see insights
+            </Text>
+          </View>
+        )}
+      </ScrollView>
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-});
