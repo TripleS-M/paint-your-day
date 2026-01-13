@@ -1,5 +1,6 @@
 import { dataService } from '@/constants/dataService';
 import { useTheme } from '@/constants/theme';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
@@ -123,14 +124,94 @@ export default function MosaicScreen() {
 
   return (
     <View style={{ flex: 1, paddingTop: 60, backgroundColor: theme.background }}>
-      {/* Header */}
+      {/* Header with Month/Year and Navigation */}
       <View style={{ paddingHorizontal: 24, paddingBottom: 24 }}>
         <Text style={{ fontSize: 12, fontWeight: '600', color: theme.foreground, opacity: 0.5, letterSpacing: 0.5 }}>
           MOSAIC
         </Text>
-        <Text style={{ fontSize: 28, fontWeight: "bold", color: theme.foreground, marginTop: 4 }}>
-          {monthName} {year}
-        </Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 }}>
+          <Text style={{ fontSize: 28, fontWeight: "bold", color: theme.foreground }}>
+            {monthName} {year}
+          </Text>
+          
+          {/* Navigation Buttons */}
+          <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
+            <Pressable
+              onPress={() => {
+                const prev = new Date(currentDate);
+                prev.setMonth(prev.getMonth() - 1);
+                // Only allow going back to January 2026
+                if (prev.getFullYear() > 2026 || (prev.getFullYear() === 2026 && prev.getMonth() >= 0)) {
+                  setCurrentDate(prev);
+                }
+              }}
+              style={({ pressed }) => {
+                const canGoBack = currentDate.getFullYear() > 2026 || (currentDate.getFullYear() === 2026 && currentDate.getMonth() > 0);
+                // TESTING FLAG: Set to true to always show navigation buttons, false for production
+                const SHOW_ALL_NAVIGATION = true;
+                const shouldShow = SHOW_ALL_NAVIGATION || canGoBack;
+                
+                return {
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  backgroundColor: '#FFFFFF',
+                  borderWidth: 1.5,
+                  borderColor: '#D1D5DB',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  opacity: shouldShow ? (pressed ? 0.7 : 1) : 0,
+                  display: shouldShow ? 'flex' : 'none',
+                };
+              }}
+              disabled={currentDate.getFullYear() === 2026 && currentDate.getMonth() === 0}
+            >
+              <FontAwesomeIcon icon={{ prefix: 'fas', iconName: 'angle-left' }} size={18} color="#000" />
+            </Pressable>
+
+            <Pressable
+              onPress={() => {
+                const next = new Date(currentDate);
+                next.setMonth(next.getMonth() + 1);
+                const today = new Date();
+                // Only allow going forward to current month
+                if (next <= today) {
+                  setCurrentDate(next);
+                }
+              }}
+              style={({ pressed }) => {
+                const today = new Date();
+                const nextMonth = new Date(currentDate);
+                nextMonth.setMonth(nextMonth.getMonth() + 1);
+                const canGoForward = nextMonth <= today;
+                // TESTING FLAG: Set to true to always show navigation buttons, false for production
+                const SHOW_ALL_NAVIGATION = true;
+                const shouldShow = SHOW_ALL_NAVIGATION || canGoForward;
+                
+                return {
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  backgroundColor: '#FFFFFF',
+                  borderWidth: 1.5,
+                  borderColor: '#D1D5DB',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  opacity: shouldShow ? (pressed ? 0.7 : 1) : 0,
+                  display: shouldShow ? 'flex' : 'none',
+                };
+              }}
+              disabled={(() => {
+                const today = new Date();
+                const nextMonth = new Date(currentDate);
+                nextMonth.setMonth(nextMonth.getMonth() + 1);
+                return nextMonth > today;
+              })()}
+            >
+              <FontAwesomeIcon icon={{ prefix: 'fas', iconName: 'angle-right' }} size={18} color="#000" />
+            </Pressable>
+          </View>
+        </View>
       </View>
 
       {/* View Toggle */}
@@ -174,61 +255,6 @@ export default function MosaicScreen() {
           }}>
             Year
           </Text>
-        </Pressable>
-      </View>
-
-      {/* Month Navigation */}
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 24, paddingBottom: 20 }}>
-        <Pressable
-          onPress={() => {
-            const prev = new Date(currentDate);
-            prev.setMonth(prev.getMonth() - 1);
-            // Only allow going back to January 2026
-            if (prev.getFullYear() > 2026 || (prev.getFullYear() === 2026 && prev.getMonth() >= 0)) {
-              setCurrentDate(prev);
-            }
-          }}
-          style={({ pressed }) => {
-            const canGoBack = currentDate.getFullYear() > 2026 || (currentDate.getFullYear() === 2026 && currentDate.getMonth() > 0);
-            return { opacity: canGoBack ? (pressed ? 0.6 : 1) : 0.3 };
-          }}
-          disabled={currentDate.getFullYear() === 2026 && currentDate.getMonth() === 0}
-        >
-          <Text style={{ fontSize: 20, color: theme.foreground }}>←</Text>
-        </Pressable>
-
-        <Pressable
-          onPress={() => setCurrentDate(new Date())}
-          style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
-        >
-          <Text style={{ fontSize: 12, color: theme.foreground, opacity: 0.6 }}>Today</Text>
-        </Pressable>
-
-        <Pressable
-          onPress={() => {
-            const next = new Date(currentDate);
-            next.setMonth(next.getMonth() + 1);
-            const today = new Date();
-            // Only allow going forward to current month
-            if (next <= today) {
-              setCurrentDate(next);
-            }
-          }}
-          style={({ pressed }) => {
-            const today = new Date();
-            const nextMonth = new Date(currentDate);
-            nextMonth.setMonth(nextMonth.getMonth() + 1);
-            const canGoForward = nextMonth <= today;
-            return { opacity: canGoForward ? (pressed ? 0.6 : 1) : 0.3 };
-          }}
-          disabled={(() => {
-            const today = new Date();
-            const nextMonth = new Date(currentDate);
-            nextMonth.setMonth(nextMonth.getMonth() + 1);
-            return nextMonth > today;
-          })()}
-        >
-          <Text style={{ fontSize: 20, color: theme.foreground }}>→</Text>
         </Pressable>
       </View>
 
