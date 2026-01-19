@@ -13,6 +13,23 @@ import {
 
 const DATA_STORAGE_KEY = 'paint_your_day_data';
 
+// Create a slightly darker shade for overlays/borders
+const getDarkColor = (hex: string): string => {
+  const normalized = hex.replace('#', '');
+  if (normalized.length !== 6) return '#c0c0c0';
+
+  const factor = 0.78;
+  const toChannel = (idx: number) => parseInt(normalized.slice(idx, idx + 2), 16);
+  const clamp = (value: number) => Math.max(0, Math.min(255, Math.round(value)));
+
+  const r = clamp(toChannel(0) * factor);
+  const g = clamp(toChannel(2) * factor);
+  const b = clamp(toChannel(4) * factor);
+
+  const toHex = (value: number) => value.toString(16).padStart(2, '0');
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+};
+
 class DataService {
   private cache: AppData | null = null;
 
@@ -23,7 +40,20 @@ class DataService {
     try {
       const stored = await AsyncStorage.getItem(DATA_STORAGE_KEY);
       if (stored) {
-        this.cache = JSON.parse(stored);
+        const parsed = JSON.parse(stored) as AppData;
+        let updated = false;
+
+        // Ensure any previously stored categories have dark colors
+        parsed.categories = parsed.categories.map((category) => {
+          if (category.darkColor) return category;
+          updated = true;
+          return { ...category, darkColor: getDarkColor(category.color) };
+        });
+
+        this.cache = parsed;
+        if (updated) {
+          await this.save();
+        }
         return;
       }
     } catch (error) {
@@ -106,6 +136,7 @@ class DataService {
     const newCategory: Category = {
       ...category,
       id: `custom_${Date.now()}`,
+      darkColor: getDarkColor(category.color),
     };
 
     this.cache.categories.push(newCategory);

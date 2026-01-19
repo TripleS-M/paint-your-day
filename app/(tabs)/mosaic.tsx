@@ -166,7 +166,7 @@ export default function MosaicScreen() {
               }}
               disabled={currentDate.getFullYear() === 2026 && currentDate.getMonth() === 0}
             >
-              <FontAwesomeIcon icon={{ prefix: 'fas', iconName: 'angle-left' }} size={18} color="#000" />
+              <FontAwesomeIcon icon={{ prefix: 'fas', iconName: 'chevron-left' }} size={18} color="#000" />
             </Pressable>
 
             <Pressable
@@ -208,7 +208,7 @@ export default function MosaicScreen() {
                 return nextMonth > today;
               })()}
             >
-              <FontAwesomeIcon icon={{ prefix: 'fas', iconName: 'angle-right' }} size={18} color="#000" />
+              <FontAwesomeIcon icon={{ prefix: 'fas', iconName: 'chevron-right' }} size={18} color="#000" />
             </Pressable>
           </View>
         </View>

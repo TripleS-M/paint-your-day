@@ -1,13 +1,11 @@
 import DayStrip from '@/components/DayStrip';
 import { dataService } from '@/constants/dataService';
-import { CategoryColors, useTheme } from '@/constants/theme';
-import type { Day } from '@/constants/types';
+import { useTheme } from '@/constants/theme';
+import type { Category, Day } from '@/constants/types';
 import { getTodayString } from '@/constants/types';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, Text, View, useColorScheme } from 'react-native';
-
-const CATEGORIES = Object.entries(CategoryColors).map(([key, value]) => ({ key, ...value }));
 
 export default function TodayScreen() {
   const theme = useTheme();
@@ -15,6 +13,7 @@ export default function TodayScreen() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [todayData, setTodayData] = useState<Day | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   const today = new Date();
   const dateString = today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
@@ -30,6 +29,9 @@ export default function TodayScreen() {
 
   const loadTodayData = async () => {
     try {
+      const allCategories = dataService.data.categories;
+      setCategories(allCategories);
+
       const day = await dataService.getOrCreateDay(todayDateStr);
       setTodayData(day);
       setIsLoaded(true);
@@ -85,21 +87,21 @@ export default function TodayScreen() {
           scrollEventThrottle={16}
         >
           <View style={{ flexDirection: 'row', gap: 10 }}>
-            {CATEGORIES.map((category) => (
+            {categories.map((category) => (
               <Pressable
-                key={category.key}
-                onPress={() => setSelectedCategory(category.key)}
+                key={category.id}
+                onPress={() => setSelectedCategory(category.id)}
                 style={({ pressed }) => {
-                  const isSelected = selectedCategory === category.key;
+                  const isSelected = selectedCategory === category.id;
                   const outlineColor = isSelected
                     ? (colorScheme === 'dark' ? '#ffffff' : '#000000')
-                    : category.light;
+                    : category.color;
                   
                   return {
                     paddingVertical: 10,
                     paddingHorizontal: 18,
                     borderRadius: 12,
-                    backgroundColor: category.light,
+                    backgroundColor: category.color,
                     borderWidth: 1.5,
                     borderColor: outlineColor,
                     opacity: pressed ? 0.8 : 1,
