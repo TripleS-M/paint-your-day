@@ -2,8 +2,8 @@ import { dataService } from '@/constants/dataService';
 import { useTheme } from '@/constants/theme';
 import type { Category } from '@/constants/types';
 import { useFocusEffect } from '@react-navigation/native';
-import { useCallback, useState } from 'react';
-import { Alert, Pressable, ScrollView, Text, View, Modal, TextInput } from 'react-native';
+import { useCallback, useRef, useState } from 'react';
+import { Alert, Modal, Pressable, RefreshControl, ScrollView, Text, TextInput, View } from 'react-native';
 
 const PASTEL_COLOR_OPTIONS = [
   '#D4C5F9', '#ADD5F7', '#F5E6D3', '#F7D4E0',
@@ -22,6 +22,8 @@ export default function CategoriesScreen() {
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
   const [formName, setFormName] = useState('');
   const [formColor, setFormColor] = useState(PASTEL_COLOR_OPTIONS[0]);
+  const [refreshing, setRefreshing] = useState(false);
+  const lastDataVersion = useRef<number>(0);
 
   useFocusEffect(
     useCallback(() => {
@@ -30,13 +32,29 @@ export default function CategoriesScreen() {
     }, [])
   );
 
-  const loadCategories = () => {
+  const loadCategories = (skipVersionCheck = false) => {
     try {
+      const currentVersion = dataService.getVersion();
+      
+      // Efficient check: if data hasn't changed, skip reload
+      if (!skipVersionCheck && currentVersion === lastDataVersion.current && categories.length > 0) {
+        return;
+      }
+
       const allCategories = dataService.data.categories;
-      setCategories(allCategories);
+      // Copy array so React always receives a new reference
+      setCategories([...allCategories]);
+      lastDataVersion.current = currentVersion;
     } catch (error) {
       console.error('Error loading categories:', error);
     }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    // Force reload on pull-to-refresh
+    loadCategories(true);
+    setRefreshing(false);
   };
 
   const openAddModal = () => {
@@ -139,7 +157,13 @@ export default function CategoriesScreen() {
       </View>
 
       {/* Categories List */}
-      <ScrollView style={{ flex: 1, paddingHorizontal: 24 }} showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        style={{ flex: 1, paddingHorizontal: 24 }} 
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         {categories.map((category) => (
           <View
             key={category.id}

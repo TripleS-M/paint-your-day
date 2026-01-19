@@ -4,8 +4,8 @@ import { useTheme } from '@/constants/theme';
 import type { Category, Day } from '@/constants/types';
 import { getTodayString } from '@/constants/types';
 import { useFocusEffect } from '@react-navigation/native';
-import { useCallback, useState } from 'react';
-import { Pressable, ScrollView, Text, View, useColorScheme } from 'react-native';
+import { useCallback, useRef, useState } from 'react';
+import { Pressable, RefreshControl, ScrollView, Text, View, useColorScheme } from 'react-native';
 
 export default function TodayScreen() {
   const theme = useTheme();
@@ -14,6 +14,8 @@ export default function TodayScreen() {
   const [todayData, setTodayData] = useState<Day | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
+  const lastDataVersion = useRef<number>(0);
 
   const today = new Date();
   const dateString = today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
@@ -27,18 +29,33 @@ export default function TodayScreen() {
     }, [])
   );
 
-  const loadTodayData = async () => {
+  const loadTodayData = async (skipVersionCheck = false) => {
     try {
+      const currentVersion = dataService.getVersion();
+      
+      // Efficient check: if data hasn't changed, skip reload
+      if (!skipVersionCheck && currentVersion === lastDataVersion.current && isLoaded) {
+        return;
+      }
+
       const allCategories = dataService.data.categories;
-      setCategories(allCategories);
+      // Copy array so React always receives a new reference
+      setCategories([...allCategories]);
 
       const day = await dataService.getOrCreateDay(todayDateStr);
       setTodayData(day);
+      lastDataVersion.current = currentVersion;
       setIsLoaded(true);
     } catch (error) {
       console.error('Error loading today data:', error);
       setIsLoaded(true);
     }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadTodayData(true); // Force reload on pull-to-refresh
+    setRefreshing(false);
   };
 
   const handleBlockUpdate = async (hour: number, categoryId: string | null) => {
@@ -65,7 +82,13 @@ export default function TodayScreen() {
   }
 
   return (
-    <View style={{ flex: 1, paddingTop: 60, backgroundColor: theme.background }}>
+    <ScrollView
+      style={{ flex: 1, backgroundColor: theme.background }}
+      contentContainerStyle={{ flexGrow: 1, paddingTop: 60 }}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
       {/* Header */}
       <View style={{ paddingHorizontal: 24, paddingBottom: 24 }}>
         <Text style={{ fontSize: 12, fontWeight: '600', color: theme.foreground, opacity: 0.5, letterSpacing: 0.5 }}>
@@ -122,7 +145,7 @@ export default function TodayScreen() {
       </View>
 
       {/* Day Strip with pinned time labels */}
-      <View style={{ flex: 1, justifyContent: 'center' }}>
+      <View style={{ flex: 1, justifyContent: 'center', minHeight: 400 }}>
         <DayStrip 
           day={todayData}
           selectedCategory={selectedCategory}
@@ -161,6 +184,6 @@ export default function TodayScreen() {
           </Text>
         </Pressable>
       </View>
-    </View>
+    </ScrollView>
   );
 }

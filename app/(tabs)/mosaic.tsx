@@ -4,14 +4,16 @@ import { faChevronLeft } from '@fortawesome/free-solid-svg-icons/faChevronLeft';
 import { faChevronRight } from '@fortawesome/free-solid-svg-icons/faChevronRight';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { useFocusEffect } from '@react-navigation/native';
-import { useCallback, useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { useCallback, useRef, useState } from 'react';
+import { Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 
 export default function MosaicScreen() {
   const theme = useTheme();
   const [days, setDays] = useState<Record<string, any>>({});
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<'month' | 'year'>('month');
+  const [refreshing, setRefreshing] = useState(false);
+  const lastDataVersion = useRef<number>(0);
 
   useFocusEffect(
     useCallback(() => {
@@ -20,13 +22,29 @@ export default function MosaicScreen() {
     }, [])
   );
 
-  const loadDays = () => {
+  const loadDays = (skipVersionCheck = false) => {
     try {
+      const currentVersion = dataService.getVersion();
+      
+      // Efficient check: if data hasn't changed, skip reload
+      if (!skipVersionCheck && currentVersion === lastDataVersion.current && Object.keys(days).length > 0) {
+        return;
+      }
+
       const allDays = dataService.getDays();
-      setDays(allDays);
+      // Ensure a new reference so UI updates immediately
+      setDays({ ...allDays });
+      lastDataVersion.current = currentVersion;
     } catch (error) {
       console.error('Error loading days:', error);
     }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    // Force reload on pull-to-refresh
+    loadDays(true);
+    setRefreshing(false);
   };
 
   const getDayColor = (dateStr: string): string => {
@@ -261,7 +279,13 @@ export default function MosaicScreen() {
       </View>
 
       {/* Content */}
-      <ScrollView style={{ flex: 1, paddingHorizontal: 16 }} showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        style={{ flex: 1, paddingHorizontal: 16 }} 
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         {viewMode === 'month' ? (
           <>
             {/* Month Day List View - each day shows 12 colored blocks */}

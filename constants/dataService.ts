@@ -32,6 +32,22 @@ const getDarkColor = (hex: string): string => {
 
 class DataService {
   private cache: AppData | null = null;
+  private dataVersion: number = 0;
+
+  /**
+   * Get the current data version number
+   * Increments automatically on every mutation
+   */
+  getVersion(): number {
+    return this.dataVersion;
+  }
+
+  /**
+   * Increment data version (called internally on mutations)
+   */
+  private incrementVersion(): void {
+    this.dataVersion++;
+  }
 
   /**
    * Initialize app data - loads from storage or creates new
@@ -61,6 +77,7 @@ class DataService {
     }
 
     this.cache = initializeAppData();
+    this.dataVersion = 0;
     await this.save();
   }
 
@@ -115,6 +132,7 @@ class DataService {
 
     if (block) {
       block.categoryId = categoryId;
+      this.incrementVersion();
       await this.save();
     }
   }
@@ -140,6 +158,7 @@ class DataService {
     };
 
     this.cache.categories.push(newCategory);
+    this.incrementVersion();
     await this.save();
     return newCategory;
   }
@@ -162,6 +181,7 @@ class DataService {
       }
       
       Object.assign(category, updates);
+      this.incrementVersion();
       await this.save();
     }
   }
@@ -184,6 +204,7 @@ class DataService {
       });
     });
 
+    this.incrementVersion();
     await this.save();
   }
 
@@ -192,7 +213,9 @@ class DataService {
    */
   getDays(): Record<string, Day> {
     if (!this.cache) return {};
-    return this.cache.days;
+    // Return a shallow copy so callers get a new reference and React can re-render
+    // (Days/blocks inside are still shared; screens only need a top-level ref change.)
+    return { ...this.cache.days };
   }
 
   /**

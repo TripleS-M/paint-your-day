@@ -1,12 +1,14 @@
 import { dataService } from '@/constants/dataService';
 import { useTheme } from '@/constants/theme';
 import { useFocusEffect } from '@react-navigation/native';
-import { useCallback, useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { useCallback, useRef, useState } from 'react';
+import { RefreshControl, ScrollView, Text, View } from 'react-native';
 
 export default function InsightsScreen() {
   const theme = useTheme();
   const [insights, setInsights] = useState<any>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const lastDataVersion = useRef<number>(0);
 
   useFocusEffect(
     useCallback(() => {
@@ -15,13 +17,29 @@ export default function InsightsScreen() {
     }, [])
   );
 
-  const loadInsights = () => {
+  const loadInsights = (skipVersionCheck = false) => {
     try {
+      const currentVersion = dataService.getVersion();
+      
+      // Efficient check: if data hasn't changed, skip reload
+      if (!skipVersionCheck && currentVersion === lastDataVersion.current && insights !== null) {
+        return;
+      }
+
       const data = dataService.getInsights();
-      setInsights(data);
+      // New object ref to ensure immediate re-render
+      setInsights(data ? { ...data } : data);
+      lastDataVersion.current = currentVersion;
     } catch (error) {
       console.error('Error loading insights:', error);
     }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    // Force reload on pull-to-refresh
+    loadInsights(true);
+    setRefreshing(false);
   };
 
   if (!insights) {
@@ -45,7 +63,13 @@ export default function InsightsScreen() {
       </View>
 
       {/* Insights Cards */}
-      <ScrollView style={{ flex: 1, paddingHorizontal: 24 }} showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        style={{ flex: 1, paddingHorizontal: 24 }} 
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         {/* Days Tracked */}
         <View
           style={{
