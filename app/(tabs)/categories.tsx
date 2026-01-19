@@ -12,13 +12,16 @@ const PASTEL_COLOR_OPTIONS = [
   '#F0D4F7', '#D4F7E8', '#E8E8D4', '#D4D4E8',
 ];
 
+type ModalMode = 'add' | 'edit';
+
 export default function CategoriesScreen() {
   const theme = useTheme();
   const [categories, setCategories] = useState<Category[]>([]);
-  const [showNewForm, setShowNewForm] = useState(false);
-  const [newName, setNewName] = useState('');
-  const [newColor, setNewColor] = useState(PASTEL_COLOR_OPTIONS[0]);
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [modalMode, setModalMode] = useState<ModalMode>('add');
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
+  const [formName, setFormName] = useState('');
+  const [formColor, setFormColor] = useState(PASTEL_COLOR_OPTIONS[0]);
 
   useFocusEffect(
     useCallback(() => {
@@ -36,25 +39,67 @@ export default function CategoriesScreen() {
     }
   };
 
-  const handleAddCategory = async () => {
-    if (!newName.trim()) {
+  const openAddModal = () => {
+    setModalMode('add');
+    setEditingCategoryId(null);
+    setFormName('');
+    setFormColor(PASTEL_COLOR_OPTIONS[0]);
+    setShowModal(true);
+  };
+
+  const openEditModal = (category: Category) => {
+    setModalMode('edit');
+    setEditingCategoryId(category.id);
+    setFormName(category.name);
+    // Use the category's actual color so it shows as selected
+    setFormColor(category.color);
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setEditingCategoryId(null);
+    setFormName('');
+    setFormColor(PASTEL_COLOR_OPTIONS[0]);
+  };
+
+  const handleSaveCategory = async () => {
+    if (!formName.trim()) {
       Alert.alert('Error', 'Category name cannot be empty');
       return;
     }
 
-    if (categories.length >= 8) {
-      Alert.alert('Limit Reached', 'You can have a maximum of 8 categories');
-      return;
-    }
-
     try {
-      await dataService.addCategory({ name: newName.trim(), color: newColor });
-      setNewName('');
-      setNewColor(PASTEL_COLOR_OPTIONS[0]);
-      setShowNewForm(false);
+      if (modalMode === 'add') {
+        if (categories.length >= 8) {
+          Alert.alert('Limit Reached', 'You can have a maximum of 8 categories');
+          return;
+        }
+        await dataService.addCategory({ name: formName.trim(), color: formColor });
+      } else {
+        // Edit mode - only update if changes were made
+        if (!editingCategoryId) return;
+        
+        const originalCategory = categories.find(c => c.id === editingCategoryId);
+        if (!originalCategory) return;
+
+        const hasChanges = 
+          formName.trim() !== originalCategory.name || 
+          formColor !== originalCategory.color;
+
+        if (hasChanges) {
+          await dataService.updateCategory(editingCategoryId, {
+            name: formName.trim(),
+            color: formColor,
+          });
+        }
+      }
+      
+      closeModal();
       loadCategories();
     } catch (error) {
-      console.error('Error adding category:', error);
+      console.error(`Error ${modalMode === 'add' ? 'adding' : 'updating'} category:`, error);
+      Alert.alert('Error', `Failed to ${modalMode === 'add' ? 'add' : 'update'} category`);
     }
   };
 
@@ -112,27 +157,24 @@ export default function CategoriesScreen() {
               {category.name}
             </Text>
             
-            {!category.id.startsWith('custom_') ? null : (
-              <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
-                <Pressable
-                  onPress={() => {
-                    setEditingId(category.id);
-                    setNewName(category.name);
-                    setNewColor(category.color);
-                  }}
-                  style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
-                >
-                  <Text style={{ fontSize: 14, color: '#000', fontWeight: '600' }}>Edit</Text>
-                </Pressable>
-                
+            <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
+              <Pressable
+                onPress={() => openEditModal(category)}
+                style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+              >
+                <Text style={{ fontSize: 14, color: '#000', fontWeight: '600' }}>Edit</Text>
+              </Pressable>
+              
+              {/* Only show delete button for custom categories */}
+              {category.id.startsWith('custom_') && (
                 <Pressable
                   onPress={() => handleDeleteCategory(category.id)}
                   style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
                 >
                   <Text style={{ fontSize: 20, color: '#000', fontWeight: '600' }}>×</Text>
                 </Pressable>
-              </View>
-            )}
+              )}
+            </View>
           </View>
         ))}
 
@@ -144,12 +186,7 @@ export default function CategoriesScreen() {
       {categories.length < 8 && (
         <View style={{ paddingHorizontal: 24, paddingBottom: 28 }}>
           <Pressable
-            onPress={() => {
-              setShowNewForm(true);
-              setEditingId(null);
-              setNewName('');
-              setNewColor(PASTEL_COLOR_OPTIONS[0]);
-            }}
+            onPress={openAddModal}
             style={({ pressed }) => ({
               borderWidth: 2,
               borderStyle: 'dashed',
@@ -166,17 +203,17 @@ export default function CategoriesScreen() {
         </View>
       )}
 
-      {/* New Category Modal */}
+      {/* Category Modal - Handles both Add and Edit */}
       <Modal
-        visible={showNewForm}
+        visible={showModal}
         transparent={true}
         animationType="fade"
-        onRequestClose={() => setShowNewForm(false)}
+        onRequestClose={closeModal}
       >
         <View style={{ flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
           <View style={{ backgroundColor: '#fff', borderRadius: 16, padding: 16, width: '100%' }}>
             <Text style={{ fontSize: 20, fontWeight: '700', color: '#000', marginBottom: 12 }}>
-              New category
+              {modalMode === 'add' ? 'New category' : 'Edit category'}
             </Text>
 
             {/* Name Input */}
@@ -186,8 +223,8 @@ export default function CategoriesScreen() {
             <TextInput
               placeholder="Category name"
               placeholderTextColor="#B0A8B9"
-              value={newName}
-              onChangeText={setNewName}
+              value={formName}
+              onChangeText={setFormName}
               style={{
                 backgroundColor: '#f5f5f5',
                 borderRadius: 12,
@@ -206,35 +243,51 @@ export default function CategoriesScreen() {
               Color
             </Text>
 
-            {/* Pastel Color Options */}
+            {/* Color Options - Include current color if not in preset options */}
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 16 }}>
-              {PASTEL_COLOR_OPTIONS.map((color) => (
+              {/* Show current color first if editing and color is not in preset options */}
+              {modalMode === 'edit' && !PASTEL_COLOR_OPTIONS.includes(formColor) && (
                 <Pressable
-                  key={color}
-                  onPress={() => setNewColor(color)}
+                  onPress={() => setFormColor(formColor)}
                   style={{
                     width: '29%',
                     height: 55,
-                    backgroundColor: color,
+                    backgroundColor: formColor,
                     borderRadius: 12,
                     borderWidth: 3,
-                    borderColor: newColor === color ? '#000' : '#ddd',
+                    borderColor: '#000',
                     justifyContent: 'center',
                     alignItems: 'center',
                   }}
                 />
-              ))}
+              )}
+              
+              {/* Preset color options */}
+              {PASTEL_COLOR_OPTIONS.map((color) => {
+                const isSelected = formColor === color;
+                return (
+                  <Pressable
+                    key={color}
+                    onPress={() => setFormColor(color)}
+                    style={{
+                      width: '29%',
+                      height: 55,
+                      backgroundColor: color,
+                      borderRadius: 12,
+                      borderWidth: 3,
+                      borderColor: isSelected ? '#000' : '#ddd',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}
+                  />
+                );
+              })}
             </View>
 
             {/* Action Buttons */}
             <View style={{ flexDirection: 'row', gap: 10 }}>
               <Pressable
-                onPress={() => {
-                  setShowNewForm(false);
-                  setNewName('');
-                  setNewColor(PASTEL_COLOR_OPTIONS[0]);
-                  setEditingId(null);
-                }}
+                onPress={closeModal}
                 style={({ pressed }) => ({
                   flex: 1,
                   backgroundColor: '#E0E0E0',
@@ -249,7 +302,7 @@ export default function CategoriesScreen() {
               </Pressable>
 
               <Pressable
-                onPress={handleAddCategory}
+                onPress={handleSaveCategory}
                 style={({ pressed }) => ({
                   flex: 1,
                   backgroundColor: '#1a1a2e',
@@ -259,7 +312,7 @@ export default function CategoriesScreen() {
                 })}
               >
                 <Text style={{ color: '#fff', fontWeight: '600', textAlign: 'center', fontSize: 16 }}>
-                  Create
+                  {modalMode === 'add' ? 'Create' : 'Confirm Edits'}
                 </Text>
               </Pressable>
             </View>

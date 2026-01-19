@@ -4,11 +4,11 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
-    AppData,
-    Category,
-    Day,
-    initializeAppData,
-    initializeEmptyDay
+  AppData,
+  Category,
+  Day,
+  initializeAppData,
+  initializeEmptyDay
 } from './types';
 
 const DATA_STORAGE_KEY = 'paint_your_day_data';
@@ -146,6 +146,7 @@ class DataService {
 
   /**
    * Update an existing category
+   * Automatically updates darkColor if color is changed
    */
   async updateCategory(
     categoryId: string,
@@ -155,6 +156,11 @@ class DataService {
 
     const category = this.cache.categories.find((c) => c.id === categoryId);
     if (category) {
+      // If color is being updated, automatically update darkColor
+      if (updates.color && updates.color !== category.color) {
+        updates.darkColor = getDarkColor(updates.color);
+      }
+      
       Object.assign(category, updates);
       await this.save();
     }
