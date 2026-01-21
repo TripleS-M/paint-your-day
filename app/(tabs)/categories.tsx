@@ -28,14 +28,14 @@ export default function CategoriesScreen() {
   useFocusEffect(
     useCallback(() => {
       loadCategories();
-      return () => {};
+      return () => { };
     }, [])
   );
 
   const loadCategories = (skipVersionCheck = false) => {
     try {
       const currentVersion = dataService.getVersion();
-      
+
       // Efficient check: if data hasn't changed, skip reload
       if (!skipVersionCheck && currentVersion === lastDataVersion.current && categories.length > 0) {
         return;
@@ -97,12 +97,12 @@ export default function CategoriesScreen() {
       } else {
         // Edit mode - only update if changes were made
         if (!editingCategoryId) return;
-        
+
         const originalCategory = categories.find(c => c.id === editingCategoryId);
         if (!originalCategory) return;
 
-        const hasChanges = 
-          formName.trim() !== originalCategory.name || 
+        const hasChanges =
+          formName.trim() !== originalCategory.name ||
           formColor !== originalCategory.color;
 
         if (hasChanges) {
@@ -112,7 +112,7 @@ export default function CategoriesScreen() {
           });
         }
       }
-      
+
       closeModal();
       loadCategories();
     } catch (error) {
@@ -157,8 +157,8 @@ export default function CategoriesScreen() {
       </View>
 
       {/* Categories List */}
-      <ScrollView 
-        style={{ flex: 1, paddingHorizontal: 24 }} 
+      <ScrollView
+        style={{ flex: 1, paddingHorizontal: 24 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -180,7 +180,7 @@ export default function CategoriesScreen() {
             <Text style={{ fontSize: 16, fontWeight: '600', color: '#000' }}>
               {category.name}
             </Text>
-            
+
             <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
               <Pressable
                 onPress={() => openEditModal(category)}
@@ -188,7 +188,7 @@ export default function CategoriesScreen() {
               >
                 <Text style={{ fontSize: 14, color: '#000', fontWeight: '600' }}>Edit</Text>
               </Pressable>
-              
+
               {/* Only show delete button for custom categories */}
               {category.id.startsWith('custom_') && (
                 <Pressable
@@ -285,7 +285,7 @@ export default function CategoriesScreen() {
                   }}
                 />
               )}
-              
+
               {/* Preset color options */}
               {PASTEL_COLOR_OPTIONS.map((color) => {
                 const isSelected = formColor === color;

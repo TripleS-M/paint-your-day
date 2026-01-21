@@ -12,7 +12,10 @@ const ENABLE_YEAR_VIEW = false; // TODO: Set to true when year view is ready for
 export default function MosaicScreen() {
   const theme = useTheme();
   const [days, setDays] = useState<Record<string, any>>({});
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentDate, setCurrentDate] = useState(() => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  });
   const [viewMode, setViewMode] = useState<'month' | 'year'>('month');
   const [refreshing, setRefreshing] = useState(false);
   const lastDataVersion = useRef<number>(0);
@@ -160,8 +163,7 @@ export default function MosaicScreen() {
           <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
             <Pressable
               onPress={() => {
-                const prev = new Date(currentDate);
-                prev.setMonth(prev.getMonth() - 1);
+                const prev = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
                 // Only allow going back to January 2026
                 if (prev.getFullYear() > 2026 || (prev.getFullYear() === 2026 && prev.getMonth() >= 0)) {
                   setCurrentDate(prev);
@@ -170,7 +172,7 @@ export default function MosaicScreen() {
               style={({ pressed }) => {
                 const canGoBack = currentDate.getFullYear() > 2026 || (currentDate.getFullYear() === 2026 && currentDate.getMonth() > 0);
                 // TESTING FLAG: Set to true to always show navigation buttons, false for production
-                const SHOW_ALL_NAVIGATION = true;
+                const SHOW_ALL_NAVIGATION = false;
                 const shouldShow = SHOW_ALL_NAVIGATION || canGoBack;
 
                 return {
@@ -193,21 +195,21 @@ export default function MosaicScreen() {
 
             <Pressable
               onPress={() => {
-                const next = new Date(currentDate);
-                next.setMonth(next.getMonth() + 1);
+                const next = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
                 const today = new Date();
+                const startOfCurrentMonth = new Date(today.getFullYear(), today.getMonth(), 1);
                 // Only allow going forward to current month
-                if (next <= today) {
+                if (next <= startOfCurrentMonth) {
                   setCurrentDate(next);
                 }
               }}
               style={({ pressed }) => {
                 const today = new Date();
-                const nextMonth = new Date(currentDate);
-                nextMonth.setMonth(nextMonth.getMonth() + 1);
-                const canGoForward = nextMonth <= today;
+                const startOfCurrentMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+                const nextMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+                const canGoForward = nextMonth <= startOfCurrentMonth;
                 // TESTING FLAG: Set to true to always show navigation buttons, false for production
-                const SHOW_ALL_NAVIGATION = true;
+                const SHOW_ALL_NAVIGATION = false;
                 const shouldShow = SHOW_ALL_NAVIGATION || canGoForward;
 
                 return {
