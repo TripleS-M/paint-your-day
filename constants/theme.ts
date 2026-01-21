@@ -13,30 +13,42 @@ export const Colors = {
   light: {
     background: '#F9FAFB',
     foreground: '#252525',
-    card: '#f9f9f9',
+    card: '#FFFFFF', // Changed to pure white to match original design
     cardForeground: '#252525',
     header: '#f5f5f5',
+    inputBackground: '#f5f5f5',
+    inputBorder: '#E0E0E0',
+    buttonBackground: '#1a1a2e',
+    buttonText: '#FFFFFF',
+    cancelButtonBackground: '#E0E0E0',
+    cancelButtonText: '#666666',
     work: '#F5D5D8',
-    relax:'#E8D5F2',
+    relax: '#E8D5F2',
     excercise: '#F5E6D3',
     rest: '#C8E6F5',
-    personal:'#D5F5E3',
-    defaultBlock:'#FFFFFF',
-    },
-    
-    dark: {
+    personal: '#D5F5E3',
+    defaultBlock: '#FFFFFF',
+  },
+
+  dark: {
     background: '#121212',
     foreground: '#ffffff',
     card: '#252525',
     cardForeground: '#ffffff',
     header: '#f5f5f5',
+    inputBackground: '#333333',
+    inputBorder: '#444444',
+    buttonBackground: '#FFFFFF',
+    buttonText: '#1a1a2e',
+    cancelButtonBackground: '#444444',
+    cancelButtonText: '#FFFFFF',
     work: '#F5D5D8',
-    relax:'#E8D5F2',
+    relax: '#E8D5F2',
     excercise: '#F5E6D3',
     rest: '#C8E6F5',
-    personal:'#D5F5E3',
-    defaultBlock:'#FFFFFF',
-    }
+    personal: '#D5F5E3',
+    defaultBlock: '#2C2C2C', // Darkened for dark mode
+  }
 };
 
 export const CategoryColors = {
@@ -59,7 +71,7 @@ export const CategoryColorsDark = {
 
 export const useTheme = () => {
   const colorScheme = useColorScheme();
-  return useMemo( () => (colorScheme === 'dark' ? Colors.dark : Colors.light), [colorScheme]);
+  return useMemo(() => (colorScheme === 'dark' ? Colors.dark : Colors.light), [colorScheme]);
 }
 
 export const Fonts = Platform.select({

@@ -235,13 +235,13 @@ export default function CategoriesScreen() {
         onRequestClose={closeModal}
       >
         <View style={{ flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
-          <View style={{ backgroundColor: '#fff', borderRadius: 16, padding: 16, width: '100%' }}>
-            <Text style={{ fontSize: 20, fontWeight: '700', color: '#000', marginBottom: 12 }}>
+          <View style={{ backgroundColor: theme.card, borderRadius: 16, padding: 16, width: '100%' }}>
+            <Text style={{ fontSize: 20, fontWeight: '700', color: theme.cardForeground, marginBottom: 12 }}>
               {modalMode === 'add' ? 'New category' : 'Edit category'}
             </Text>
 
             {/* Name Input */}
-            <Text style={{ fontSize: 14, fontWeight: '600', color: '#000', marginBottom: 6 }}>
+            <Text style={{ fontSize: 14, fontWeight: '600', color: theme.cardForeground, marginBottom: 6 }}>
               Name
             </Text>
             <TextInput
@@ -250,20 +250,20 @@ export default function CategoriesScreen() {
               value={formName}
               onChangeText={setFormName}
               style={{
-                backgroundColor: '#f5f5f5',
+                backgroundColor: theme.inputBackground,
                 borderRadius: 12,
                 paddingHorizontal: 16,
                 paddingVertical: 10,
                 fontSize: 16,
-                color: '#000',
+                color: theme.cardForeground,
                 marginBottom: 12,
                 borderWidth: 1,
-                borderColor: '#E0E0E0',
+                borderColor: theme.inputBorder,
               }}
             />
 
             {/* Color Label */}
-            <Text style={{ fontSize: 14, fontWeight: '600', color: '#000', marginBottom: 10 }}>
+            <Text style={{ fontSize: 14, fontWeight: '600', color: theme.cardForeground, marginBottom: 10 }}>
               Color
             </Text>
 
@@ -279,7 +279,7 @@ export default function CategoriesScreen() {
                     backgroundColor: formColor,
                     borderRadius: 12,
                     borderWidth: 3,
-                    borderColor: '#000',
+                    borderColor: theme.cardForeground,
                     justifyContent: 'center',
                     alignItems: 'center',
                   }}
@@ -299,7 +299,7 @@ export default function CategoriesScreen() {
                       backgroundColor: color,
                       borderRadius: 12,
                       borderWidth: 3,
-                      borderColor: isSelected ? '#000' : '#ddd',
+                      borderColor: isSelected ? theme.cardForeground : theme.inputBorder,
                       justifyContent: 'center',
                       alignItems: 'center',
                     }}
@@ -314,13 +314,13 @@ export default function CategoriesScreen() {
                 onPress={closeModal}
                 style={({ pressed }) => ({
                   flex: 1,
-                  backgroundColor: '#E0E0E0',
+                  backgroundColor: theme.cancelButtonBackground,
                   paddingVertical: 10,
                   borderRadius: 12,
                   opacity: pressed ? 0.8 : 1,
                 })}
               >
-                <Text style={{ color: '#666', fontWeight: '600', textAlign: 'center', fontSize: 16 }}>
+                <Text style={{ color: theme.cancelButtonText, fontWeight: '600', textAlign: 'center', fontSize: 16 }}>
                   Cancel
                 </Text>
               </Pressable>
@@ -329,13 +329,13 @@ export default function CategoriesScreen() {
                 onPress={handleSaveCategory}
                 style={({ pressed }) => ({
                   flex: 1,
-                  backgroundColor: '#1a1a2e',
+                  backgroundColor: theme.buttonBackground,
                   paddingVertical: 10,
                   borderRadius: 12,
                   opacity: pressed ? 0.8 : 1,
                 })}
               >
-                <Text style={{ color: '#fff', fontWeight: '600', textAlign: 'center', fontSize: 16 }}>
+                <Text style={{ color: theme.buttonText, fontWeight: '600', textAlign: 'center', fontSize: 16 }}>
                   {modalMode === 'add' ? 'Create' : 'Confirm Edits'}
                 </Text>
               </Pressable>
