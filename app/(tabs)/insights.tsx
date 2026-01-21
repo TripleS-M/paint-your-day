@@ -13,14 +13,14 @@ export default function InsightsScreen() {
   useFocusEffect(
     useCallback(() => {
       loadInsights();
-      return () => {};
+      return () => { };
     }, [])
   );
 
   const loadInsights = (skipVersionCheck = false) => {
     try {
       const currentVersion = dataService.getVersion();
-      
+
       // Efficient check: if data hasn't changed, skip reload
       if (!skipVersionCheck && currentVersion === lastDataVersion.current && insights !== null) {
         return;
@@ -63,8 +63,8 @@ export default function InsightsScreen() {
       </View>
 
       {/* Insights Cards */}
-      <ScrollView 
-        style={{ flex: 1, paddingHorizontal: 24 }} 
+      <ScrollView
+        style={{ flex: 1, paddingHorizontal: 24 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -121,9 +121,6 @@ export default function InsightsScreen() {
                 {insights.mostUsedCategory.name}
               </Text>
             </View>
-            <Text style={{ fontSize: 12, color: theme.foreground, opacity: 0.5, textAlign: 'center' }}>
-              {insights.mostUsedCategory.color}
-            </Text>
           </View>
         )}
 
@@ -142,7 +139,7 @@ export default function InsightsScreen() {
             <Text style={{ fontSize: 12, color: theme.foreground, opacity: 0.6, marginBottom: 12 }}>
               Your Palette Usage
             </Text>
-            {insights.categoryUsage.slice(0, 6).map((item: any, index: number) => (
+            {insights.categoryUsage.slice(0, 7).map((item: any, index: number) => (
               <View key={index} style={{ marginBottom: 12 }}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
                   <Text style={{ fontSize: 14, fontWeight: '500', color: theme.foreground }}>
@@ -155,7 +152,7 @@ export default function InsightsScreen() {
                 <View
                   style={{
                     height: 8,
-                    backgroundColor: '#eee',
+                    backgroundColor: '#f5f5f5',
                     borderRadius: 4,
                     overflow: 'hidden',
                   }}

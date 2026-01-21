@@ -121,27 +121,26 @@ export default function CategoriesScreen() {
     }
   };
 
-  const handleDeleteCategory = (categoryId: string) => {
-    const category = dataService.getCategory(categoryId);
-    Alert.alert(
-      'Delete Category',
-      `Are you sure you want to delete "${category?.name}"?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await dataService.deleteCategory(categoryId);
-              loadCategories();
-            } catch (error) {
-              console.error('Error deleting category:', error);
-            }
-          },
-        },
-      ]
-    );
+  /* Delete Validation */
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
+
+  const confirmDeleteCategory = (category: Category) => {
+    setCategoryToDelete(category);
+    setShowDeleteModal(true);
+  };
+
+  const executeDeleteCategory = async () => {
+    if (!categoryToDelete) return;
+
+    try {
+      await dataService.deleteCategory(categoryToDelete.id);
+      loadCategories();
+      setShowDeleteModal(false);
+      setCategoryToDelete(null);
+    } catch (error) {
+      console.error('Error deleting category:', error);
+    }
   };
 
   return (
@@ -192,7 +191,7 @@ export default function CategoriesScreen() {
               {/* Only show delete button for custom categories */}
               {category.id.startsWith('custom_') && (
                 <Pressable
-                  onPress={() => handleDeleteCategory(category.id)}
+                  onPress={() => confirmDeleteCategory(category)}
                   style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
                 >
                   <Text style={{ fontSize: 20, color: '#000', fontWeight: '600' }}>×</Text>
@@ -337,6 +336,58 @@ export default function CategoriesScreen() {
               >
                 <Text style={{ color: theme.buttonText, fontWeight: '600', textAlign: 'center', fontSize: 16 }}>
                   {modalMode === 'add' ? 'Create' : 'Confirm Edits'}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        visible={showDeleteModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowDeleteModal(false)}
+      >
+        <View style={{ flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
+          <View style={{ backgroundColor: theme.card, borderRadius: 16, padding: 24, width: '100%', maxWidth: 340 }}>
+            <Text style={{ fontSize: 20, fontWeight: '700', color: theme.cardForeground, marginBottom: 12, textAlign: 'center' }}>
+              Delete Category?
+            </Text>
+
+            <Text style={{ fontSize: 16, color: theme.cardForeground, opacity: 0.8, marginBottom: 24, textAlign: 'center', lineHeight: 22 }}>
+              Are you sure you want to delete "{categoryToDelete?.name}"? This action cannot be undone.
+            </Text>
+
+            <View style={{ gap: 12 }}>
+              <Pressable
+                onPress={executeDeleteCategory}
+                style={({ pressed }) => ({
+                  backgroundColor: theme.destructive,
+                  paddingVertical: 14,
+                  borderRadius: 12,
+                  opacity: pressed ? 0.8 : 1,
+                  alignItems: 'center'
+                })}
+              >
+                <Text style={{ color: theme.destructiveText, fontWeight: '600', fontSize: 16 }}>
+                  Delete
+                </Text>
+              </Pressable>
+
+              <Pressable
+                onPress={() => setShowDeleteModal(false)}
+                style={({ pressed }) => ({
+                  backgroundColor: theme.cancelButtonBackground,
+                  paddingVertical: 14,
+                  borderRadius: 12,
+                  opacity: pressed ? 0.8 : 1,
+                  alignItems: 'center'
+                })}
+              >
+                <Text style={{ color: theme.cancelButtonText, fontWeight: '600', fontSize: 16 }}>
+                  Cancel
                 </Text>
               </Pressable>
             </View>

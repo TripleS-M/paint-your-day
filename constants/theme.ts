@@ -22,6 +22,8 @@ export const Colors = {
     buttonText: '#FFFFFF',
     cancelButtonBackground: '#E0E0E0',
     cancelButtonText: '#666666',
+    destructive: '#DC2626', // Red-600
+    destructiveText: '#FFFFFF',
     work: '#F5D5D8',
     relax: '#E8D5F2',
     excercise: '#F5E6D3',
@@ -42,6 +44,8 @@ export const Colors = {
     buttonText: '#1a1a2e',
     cancelButtonBackground: '#444444',
     cancelButtonText: '#FFFFFF',
+    destructive: '#EF4444', // Red-500
+    destructiveText: '#FFFFFF',
     work: '#F5D5D8',
     relax: '#E8D5F2',
     excercise: '#F5E6D3',
