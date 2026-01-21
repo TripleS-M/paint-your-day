@@ -7,6 +7,8 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useCallback, useRef, useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 
+const ENABLE_YEAR_VIEW = false; // TODO: Set to true when year view is ready for deployment
+
 export default function MosaicScreen() {
   const theme = useTheme();
   const [days, setDays] = useState<Record<string, any>>({});
@@ -18,14 +20,14 @@ export default function MosaicScreen() {
   useFocusEffect(
     useCallback(() => {
       loadDays();
-      return () => {};
+      return () => { };
     }, [])
   );
 
   const loadDays = (skipVersionCheck = false) => {
     try {
       const currentVersion = dataService.getVersion();
-      
+
       // Efficient check: if data hasn't changed, skip reload
       if (!skipVersionCheck && currentVersion === lastDataVersion.current && Object.keys(days).length > 0) {
         return;
@@ -83,12 +85,12 @@ export default function MosaicScreen() {
     for (let blockIndex = 0; blockIndex < 12; blockIndex++) {
       const hour1 = blockIndex * 2;
       const hour2 = blockIndex * 2 + 1;
-      
+
       const block1 = day.blocks[hour1];
       const block2 = day.blocks[hour2];
-      
+
       let blockColor = theme.defaultBlock;
-      
+
       // Prefer the first hour's category, if not found use second hour
       if (block1?.categoryId) {
         const category = dataService.getCategory(block1.categoryId);
@@ -97,7 +99,7 @@ export default function MosaicScreen() {
         const category = dataService.getCategory(block2.categoryId);
         blockColor = category?.color || theme.defaultBlock;
       }
-      
+
       colors.push(blockColor);
     }
     return colors;
@@ -153,7 +155,7 @@ export default function MosaicScreen() {
           <Text style={{ fontSize: 28, fontWeight: "bold", color: theme.foreground }}>
             {monthName} {year}
           </Text>
-          
+
           {/* Navigation Buttons */}
           <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
             <Pressable
@@ -170,7 +172,7 @@ export default function MosaicScreen() {
                 // TESTING FLAG: Set to true to always show navigation buttons, false for production
                 const SHOW_ALL_NAVIGATION = true;
                 const shouldShow = SHOW_ALL_NAVIGATION || canGoBack;
-                
+
                 return {
                   width: 40,
                   height: 40,
@@ -207,7 +209,7 @@ export default function MosaicScreen() {
                 // TESTING FLAG: Set to true to always show navigation buttons, false for production
                 const SHOW_ALL_NAVIGATION = true;
                 const shouldShow = SHOW_ALL_NAVIGATION || canGoForward;
-                
+
                 return {
                   width: 40,
                   height: 40,
@@ -235,52 +237,54 @@ export default function MosaicScreen() {
       </View>
 
       {/* View Toggle */}
-      <View style={{ flexDirection: 'row', paddingHorizontal: 24, paddingBottom: 16, gap: 8 }}>
-        <Pressable
-          onPress={() => setViewMode('month')}
-          style={({ pressed }) => ({
-            paddingHorizontal: 16,
-            paddingVertical: 8,
-            borderRadius: 8,
-            backgroundColor: viewMode === 'month' ? theme.foreground : 'transparent',
-            borderWidth: viewMode === 'month' ? 0 : 1,
-            borderColor: theme.foreground,
-            opacity: pressed ? 0.7 : 1,
-          })}
-        >
-          <Text style={{
-            fontSize: 14,
-            fontWeight: '600',
-            color: viewMode === 'month' ? theme.background : theme.foreground,
-          }}>
-            Month
-          </Text>
-        </Pressable>
-        <Pressable
-          onPress={() => setViewMode('year')}
-          style={({ pressed }) => ({
-            paddingHorizontal: 16,
-            paddingVertical: 8,
-            borderRadius: 8,
-            backgroundColor: viewMode === 'year' ? theme.foreground : 'transparent',
-            borderWidth: viewMode === 'year' ? 0 : 1,
-            borderColor: theme.foreground,
-            opacity: pressed ? 0.7 : 1,
-          })}
-        >
-          <Text style={{
-            fontSize: 14,
-            fontWeight: '600',
-            color: viewMode === 'year' ? theme.background : theme.foreground,
-          }}>
-            Year
-          </Text>
-        </Pressable>
-      </View>
+      {ENABLE_YEAR_VIEW && (
+        <View style={{ flexDirection: 'row', paddingHorizontal: 24, paddingBottom: 16, gap: 8 }}>
+          <Pressable
+            onPress={() => setViewMode('month')}
+            style={({ pressed }) => ({
+              paddingHorizontal: 16,
+              paddingVertical: 8,
+              borderRadius: 8,
+              backgroundColor: viewMode === 'month' ? theme.foreground : 'transparent',
+              borderWidth: viewMode === 'month' ? 0 : 1,
+              borderColor: theme.foreground,
+              opacity: pressed ? 0.7 : 1,
+            })}
+          >
+            <Text style={{
+              fontSize: 14,
+              fontWeight: '600',
+              color: viewMode === 'month' ? theme.background : theme.foreground,
+            }}>
+              Month
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={() => setViewMode('year')}
+            style={({ pressed }) => ({
+              paddingHorizontal: 16,
+              paddingVertical: 8,
+              borderRadius: 8,
+              backgroundColor: viewMode === 'year' ? theme.foreground : 'transparent',
+              borderWidth: viewMode === 'year' ? 0 : 1,
+              borderColor: theme.foreground,
+              opacity: pressed ? 0.7 : 1,
+            })}
+          >
+            <Text style={{
+              fontSize: 14,
+              fontWeight: '600',
+              color: viewMode === 'year' ? theme.background : theme.foreground,
+            }}>
+              Year
+            </Text>
+          </Pressable>
+        </View>
+      )}
 
       {/* Content */}
-      <ScrollView 
-        style={{ flex: 1, paddingHorizontal: 16 }} 
+      <ScrollView
+        style={{ flex: 1, paddingHorizontal: 16 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -306,7 +310,7 @@ export default function MosaicScreen() {
                         {get2HourBlockColors(dayObj.dateStr).map((color, blockIndex, array) => {
                           const isFirst = blockIndex === 0;
                           const isLast = blockIndex === array.length - 1;
-                          
+
                           return (
                             <View
                               key={blockIndex}
