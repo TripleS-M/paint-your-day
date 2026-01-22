@@ -179,7 +179,7 @@ class DataService {
       if (updates.color && updates.color !== category.color) {
         updates.darkColor = getDarkColor(updates.color);
       }
-      
+
       Object.assign(category, updates);
       this.incrementVersion();
       await this.save();
@@ -226,8 +226,14 @@ class DataService {
 
     const categoryUsage: Record<string, number> = {};
     let totalBlocksAssigned = 0;
+    let daysWithDataCount = 0;
 
     Object.values(this.cache.days).forEach((day) => {
+      const hasAnyData = day.blocks.some((b) => b.categoryId !== null);
+      if (hasAnyData) {
+        daysWithDataCount++;
+      }
+
       day.blocks.forEach((block) => {
         if (block.categoryId) {
           categoryUsage[block.categoryId] =
@@ -246,8 +252,8 @@ class DataService {
       .filter(({ category }) => category !== undefined);
 
     return {
-      totalDaysTracked: Object.keys(this.cache.days).length,
-      totalBlocksAssigned,
+      totalDaysTracked: daysWithDataCount,
+      totalBlocksAssigned: totalBlocksAssigned * 2,
       mostUsedCategory: sortedCategories[0]?.category,
       categoryUsage: sortedCategories,
     };

@@ -22,6 +22,7 @@ const MAPPING = {
   'lightbulb.fill': 'insights',
   'chevron.left.forwardslash.chevron.right': 'code',
   'chevron.right': 'chevron-right',
+  'chevron.left': 'chevron-left',
 } as IconMapping;
 
 /**

@@ -1,8 +1,9 @@
 import DayStrip from '@/components/DayStrip';
+import { IconSymbol } from '@/components/ui/icon-symbol';
 import { dataService } from '@/constants/dataService';
 import { useTheme } from '@/constants/theme';
 import type { Category, Day } from '@/constants/types';
-import { getTodayString } from '@/constants/types';
+import { formatDate, getTodayString } from '@/constants/types';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback, useRef, useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, Text, View, useColorScheme } from 'react-native';
@@ -15,24 +16,48 @@ export default function TodayScreen() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [currentDate, setCurrentDate] = useState(new Date());
+
   const lastDataVersion = useRef<number>(0);
 
-  const today = new Date();
-  const dateString = today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-  const todayDateStr = getTodayString();
+  // Dev toggle: Set to true to allow unlimited past navigation
+  const DEV_UNRESTRICTED_NAVIGATION = false;
+
+  // Helper to check if viewing today
+  const isToday = formatDate(currentDate) === getTodayString();
+
+  // Back navigation is allowed if we're in dev mode OR if we're currently on today (allowing 1 step back)
+  const canGoBack = DEV_UNRESTRICTED_NAVIGATION || isToday;
+
+  const dateString = currentDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+  const currentDateStr = formatDate(currentDate);
+
+  const navigateDate = (days: number) => {
+    // Prevent going back if not allowed
+    if (days < 0 && !canGoBack) return;
+
+    const newDate = new Date(currentDate);
+    newDate.setDate(currentDate.getDate() + days);
+
+    // Prevent going into future
+    if (days > 0 && isToday) return;
+
+    setCurrentDate(newDate);
+    setIsLoaded(false); // Trigger loading state for new date
+  };
 
   // Load data on component focus
   useFocusEffect(
     useCallback(() => {
-      loadTodayData();
-      return () => {};
-    }, [])
+      loadData();
+      return () => { };
+    }, [currentDate]) // Reload when date changes
   );
 
-  const loadTodayData = async (skipVersionCheck = false) => {
+  const loadData = async (skipVersionCheck = false) => {
     try {
       const currentVersion = dataService.getVersion();
-      
+
       // Efficient check: if data hasn't changed, skip reload
       if (!skipVersionCheck && currentVersion === lastDataVersion.current && isLoaded) {
         return;
@@ -42,7 +67,7 @@ export default function TodayScreen() {
       // Copy array so React always receives a new reference
       setCategories([...allCategories]);
 
-      const day = await dataService.getOrCreateDay(todayDateStr);
+      const day = await dataService.getOrCreateDay(currentDateStr);
       setTodayData(day);
       lastDataVersion.current = currentVersion;
       setIsLoaded(true);
@@ -54,15 +79,15 @@ export default function TodayScreen() {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await loadTodayData(true); // Force reload on pull-to-refresh
+    await loadData(true); // Force reload on pull-to-refresh
     setRefreshing(false);
   };
 
   const handleBlockUpdate = async (hour: number, categoryId: string | null) => {
     try {
-      await dataService.updateBlock(todayDateStr, hour, categoryId);
+      await dataService.updateBlock(currentDateStr, hour, categoryId);
       // Reload today's data and create new object reference for React to detect change
-      const updated = await dataService.getOrCreateDay(todayDateStr);
+      const updated = await dataService.getOrCreateDay(currentDateStr);
       // Create a new copy of the day object to force React to detect the change
       setTodayData({
         ...updated,
@@ -91,10 +116,33 @@ export default function TodayScreen() {
     >
       {/* Header */}
       <View style={{ paddingHorizontal: 24, paddingBottom: 24 }}>
-        <Text style={{ fontSize: 12, fontWeight: '600', color: theme.foreground, opacity: 0.5, letterSpacing: 0.5 }}>
-          TODAY
-        </Text>
-        <Text style={{ fontSize: 28, fontWeight: "bold", color: theme.foreground, marginTop: 4 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+          <Text style={{ fontSize: 12, fontWeight: '600', color: theme.foreground, opacity: 0.5, letterSpacing: 0.5 }}>
+            {isToday ? 'TODAY' : 'HISTORY'}
+          </Text>
+
+          <View style={{ flexDirection: 'row', gap: 16 }}>
+            <Pressable
+              onPress={() => navigateDate(-1)}
+              hitSlop={10}
+              disabled={!canGoBack}
+              style={{ opacity: canGoBack ? 1 : 0.3 }}
+            >
+              <IconSymbol name="chevron.left" size={24} color={theme.foreground} />
+            </Pressable>
+
+            <Pressable
+              onPress={() => navigateDate(1)}
+              hitSlop={10}
+              disabled={isToday}
+              style={{ opacity: isToday ? 0.3 : 1 }}
+            >
+              <IconSymbol name="chevron.right" size={24} color={theme.foreground} />
+            </Pressable>
+          </View>
+        </View>
+
+        <Text style={{ fontSize: 28, fontWeight: "bold", color: theme.foreground }}>
           {dateString}
         </Text>
       </View>
@@ -104,8 +152,8 @@ export default function TodayScreen() {
         <Text style={{ fontSize: 11, fontWeight: '600', color: theme.foreground, opacity: 0.5, letterSpacing: 0.5, marginBottom: 12 }}>
           SELECT CATEGORY
         </Text>
-        <ScrollView 
-          horizontal 
+        <ScrollView
+          horizontal
           showsHorizontalScrollIndicator={false}
           scrollEventThrottle={16}
         >
@@ -119,7 +167,7 @@ export default function TodayScreen() {
                   const outlineColor = isSelected
                     ? (colorScheme === 'dark' ? '#ffffff' : '#000000')
                     : category.color;
-                  
+
                   return {
                     paddingVertical: 10,
                     paddingHorizontal: 18,
@@ -131,8 +179,8 @@ export default function TodayScreen() {
                   };
                 }}
               >
-                <Text style={{ 
-                  fontSize: 13, 
+                <Text style={{
+                  fontSize: 13,
                   fontWeight: '600',
                   color: '#000',
                 }}>
@@ -146,7 +194,7 @@ export default function TodayScreen() {
 
       {/* Day Strip with pinned time labels */}
       <View style={{ flex: 1, justifyContent: 'center', minHeight: 400 }}>
-        <DayStrip 
+        <DayStrip
           day={todayData}
           selectedCategory={selectedCategory}
           onBlockUpdate={handleBlockUpdate}
@@ -162,7 +210,7 @@ export default function TodayScreen() {
             const outlineColor = isClearPressed
               ? (colorScheme === 'dark' ? '#ffffff' : '#000000')
               : theme.defaultBlock;
-            
+
             return {
               paddingVertical: 12,
               paddingHorizontal: 24,
@@ -174,8 +222,8 @@ export default function TodayScreen() {
             };
           }}
         >
-          <Text style={{ 
-            fontSize: 13, 
+          <Text style={{
+            fontSize: 13,
             fontWeight: '600',
             color: '#666',
             textAlign: 'center'
