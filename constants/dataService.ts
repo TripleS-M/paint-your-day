@@ -247,7 +247,7 @@ class DataService {
       .sort(([, a], [, b]) => b - a)
       .map(([id, count]) => {
         const category = this.cache!.categories.find((c) => c.id === id);
-        return { category, count };
+        return { category, count: count*2 };
       })
       .filter(({ category }) => category !== undefined);
 
