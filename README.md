@@ -1,50 +1,98 @@
-# Welcome to your Expo app 👋
+# Paint Your Day 🎨
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Paint Your Day is a minimalist time-visualization app designed to help you track your day with color and meaning, rather than strict schedules and timers. By assigning categories (like Work, Rest, Creative) to time blocks, you create a visual pattern of your life, offering insights into how you spend your most valuable resource.
 
-## Get started
+> **Philosophy**: No timers, no productivity guilt, no instructions needed. Just interaction → meaning.
 
-1. Install dependencies
+## ✨ Features
 
-   ```bash
-   npm install
-   ```
+### 📅 Today: Paint Your Day
+The core of the app.
+- **Interactive Grid**: A 24-hour grid where each block represents an hour of your day.
+- **Paint with Color**: Select a category (e.g., Creative, Work, Rest) and tap time blocks to "paint" them.
+- **Intuitive Interface**: Single tap to paint, tap again to modify.
+- **Real-time Saving**: Your data is saved instantly as you paint.
 
-2. Start the app
+### 🧩 Mosaic: The Big Picture
+See your life in pixels.
+- **Calendar View**: View your month as a colorful mosaic.
+- **Dominant Moods**: Each day in the calendar reflects the dominant category/color of that day.
+- **Navigation**: Easily browse through past months and years to see long-term patterns.
 
-   ```bash
-   npx expo start
-   ```
+### 📊 Insights: Deep Analytics
+Understand your habits.
+- **Usage Breakdown**: See exactly how much time you spend on each category.
+- **Visual Stats**: Progress bars and color-coded statistics helps you visualize balance (or imbalance).
+- **Reflection**: Tracks total days logged and highlights your most frequent activities.
 
-In the output, you'll find options to open the app in a
+### 🎨 Fully Customizable
+Make it yours.
+- **Custom Categories**: Create your own categories with custom names and colors.
+- **Manage**: Add, edit, or delete categories to fit your changing lifestyle.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+---
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## 🚀 How It Works
 
-## Get a fresh project
+1.  **Select a Category**: Tap a color from the category strip at the top (e.g., "Work" in Blue).
+2.  **Paint Time Blocks**: Tap the hour blocks for the times you spent working.
+3.  **Review**: Watch your day fill up with color.
+4.  **Reflect**: Check the Mosaic and Insights tabs to see trends over time.
 
-When you're ready, run:
+---
+
+## 🛠️ Tech Stack
+
+-   **Framework**: [React Native](https://reactnative.dev/) with [Expo](https://expo.dev/)
+-   **Language**: [TypeScript](https://www.typescriptlang.org/)
+-   **Styling**: [NativeWind](https://www.nativewind.dev/) (Tailwind CSS for React Native)
+-   **Routing**: [Expo Router](https://docs.expo.dev/router/introduction/)
+-   **Storage**: AsyncStorage (Local persistence)
+-   **Icons**: FontAwesome & Expo Symbols
+
+---
+
+## 🏃‍♂️ Getting Started
+
+### Prerequisites
+Please see [REQUIREMENTS.md](./REQUIREMENTS.md) for a list of tools you need installed on your machine.
+
+### Installation
+
+1.  **Clone the repository**:
+    ```bash
+    git clone https://github.com/yourusername/paintyourday.git
+    cd paintyourday
+    ```
+
+2.  **Install dependencies**:
+    ```bash
+    npm install
+    ```
+
+### Running the App
+
+Start the development server:
 
 ```bash
-npm run reset-project
+npx expo start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+This will display a QR code in your terminal.
+-   **Physical Device**: Scan the QR code with the **Expo Go** app (Android/iOS).
+-   **Emulator**: Press `a` to open in Android Emulator or `i` to open in iOS Simulator (requires setup, see Requirements).
 
-## Learn more
+---
 
-To learn more about developing your project with Expo, look at the following resources:
+## 📂 Project Structure
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```
+PaintYourDay/
+├── app/                 # Main application code (Expo Router)
+│   ├── (tabs)/          # Tab navigation screens (Today, Mosaic, etc.)
+│   └── _layout.tsx      # Root layout and navigation setup
+├── components/          # Reusable UI components (DayStrip, TimeBlock)
+├── constants/           # Data services, themes, and types
+├── assets/              # Images and fonts
+└── hooks/               # Custom React hooks
+```
