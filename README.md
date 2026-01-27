@@ -12,23 +12,25 @@ The core of the app.
 - **Paint with Color**: Select a category (e.g., Creative, Work, Rest) and tap time blocks to "paint" them.
 - **Intuitive Interface**: Single tap to paint, tap again to modify.
 - **Real-time Saving**: Your data is saved instantly as you paint.
-
+![alt text](<Screenshot_20260127_095059_Expo Go.jpg>)
 ### 🧩 Mosaic: The Big Picture
 See your life in pixels.
 - **Calendar View**: View your month as a colorful mosaic.
 - **Dominant Moods**: Each day in the calendar reflects the dominant category/color of that day.
 - **Navigation**: Easily browse through past months and years to see long-term patterns.
-
+![alt text](<Screenshot_20260127_095111_Expo Go.jpg>)
 ### 📊 Insights: Deep Analytics
 Understand your habits.
 - **Usage Breakdown**: See exactly how much time you spend on each category.
 - **Visual Stats**: Progress bars and color-coded statistics helps you visualize balance (or imbalance).
 - **Reflection**: Tracks total days logged and highlights your most frequent activities.
+![alt text](<Screenshot_20260127_095127_Expo Go.jpg>)
 
 ### 🎨 Fully Customizable
 Make it yours.
 - **Custom Categories**: Create your own categories with custom names and colors.
 - **Manage**: Add, edit, or delete categories to fit your changing lifestyle.
+![alt text](<Screenshot_20260127_095116_Expo Go.jpg>)
 
 ---
 
