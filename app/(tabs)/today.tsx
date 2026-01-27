@@ -198,7 +198,7 @@ export default function TodayScreen() {
           day={todayData}
           selectedCategory={selectedCategory}
           onBlockUpdate={handleBlockUpdate}
-          
+
         />
       </View>
 
